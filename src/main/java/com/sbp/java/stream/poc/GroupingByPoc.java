@@ -3,10 +3,7 @@ package com.sbp.java.stream.poc;
 import com.sbp.java.stream.models.Employee;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,6 +39,9 @@ public class GroupingByPoc {
         Employee emp9 = new Employee("3", "9", 50000000);
         employees.add(emp9);
 
+        Employee emp10 = new Employee("3", "10", 55000000);
+        employees.add(emp10);
+
         //Print 2nd highest salary employee from each department
 
         log.info("Find the 2nd highest salary employee from each department: ");
@@ -51,12 +51,25 @@ public class GroupingByPoc {
                         Employee::getDepartmentId,
                         Collectors.collectingAndThen(Collectors.toList(),
                                 list -> list.stream()
-                                        .sorted(Comparator.comparing(Employee::getSalary))
+                                        .sorted(Comparator.comparing(Employee::getSalary).reversed())
                                         .skip(1).findFirst().orElseThrow())
                 ))
                 .values()
                 .stream()
                 .forEach(e->System.out.println(e));
 
+        log.info("Alternate approach: Find the 2nd highest salary employee from each department");
+        Map<String, List<Employee>> empMap = employees.stream()
+                .collect(Collectors.groupingBy(
+                        Employee::getDepartmentId,
+                        Collectors.collectingAndThen(Collectors.toList(),
+                                list->list.stream()
+                                        .sorted(Comparator.comparing(Employee::getSalary).reversed())
+                                        .skip(1)
+                                        .toList()
+                        )));
+
+        log.info("=============================");
+        log.info("empMap: " + empMap);
     }
 }
